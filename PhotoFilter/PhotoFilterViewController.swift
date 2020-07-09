@@ -98,6 +98,35 @@ class PhotoFilterViewController: UIViewController {
         present(imagePicker, animated: true)
     }
     
+    func savePhoto() {
+        guard let orginialImage = originalImage else { return }
+        
+        guard let processImaged = self.filterImage(orginialImage.flattened) else { return }
+        
+        PHPhotoLibrary.requestAuthorization { (status) in
+            
+            guard status == .authorized else { return }
+            
+            // Let the library know we are going to make changes
+            PHPhotoLibrary.shared().performChanges({
+                
+                // Make a new photo creation request
+                PHAssetCreationRequest.creationRequestForAsset(from: processImaged)
+                
+            }) { (succes, error) in
+                
+                if let error = error {
+                    NSLog("Error saving photo: \(error)")
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    print("Saved image to photo library ")
+                }
+            }
+        }
+    }
+    
     // MARK: IBActions
     
     @IBAction func choosePhotoButtonPressed(_ sender: Any) {
@@ -108,6 +137,7 @@ class PhotoFilterViewController: UIViewController {
     
     @IBAction func savePhotoButtonPressed(_ sender: UIButton) {
         // TODO: Save to photo library
+        savePhoto()
     }
     
     
